@@ -53,7 +53,7 @@ module Dyn
         @password = password
         @rest = Dyn::HttpClient::DefaultClient.new("api2.dynect.net", "443", "https")
         @rest.default_headers = {
-          'User-Agent'   => 'dyn-rb 1.0.4',
+          'User-Agent'   => 'dyn-rb 1.0.3',
           'Content-Type' => 'application/json'
         }
         @zone = zone 
@@ -140,7 +140,7 @@ module Dyn
       ##
       # Resource Record API
       ##
-      %w{AAAA A CNAME DNSKEY DS KEY LOC MX NS PTR RP SOA SRV TXT}.each do |record_type|
+      %w{AAAA A CNAME DNSKEY DS KEY LOC MX NS PTR RP SOA SRV TXT Failover}.each do |record_type|
         define_method underscore(record_type) do
           Dyn::Traffic::Resource.new(self, @zone, "#{record_type}")
         end
