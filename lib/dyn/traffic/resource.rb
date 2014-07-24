@@ -54,7 +54,9 @@ module Dyn
       end
 
       def resource_path(full=false)
-        @record_type << "Record" unless @record_type[-6,6] == "Record"
+        if record_type != "Failover"
+          @record_type << "Record" unless @record_type[-6,6] == "Record"
+        end
         if (full == true || full == :full)
           "/REST/#{@record_type}/#{@zone}"
         else
@@ -64,10 +66,10 @@ module Dyn
 
       def get(fqdn = nil, record_id=nil)
         if record_id && fqdn
-          raw_rr = @dyn.get("#{resource_path}/#{fqdn}/#{record_id}")
+          raw_rr = @dynect.get("#{resource_path}/#{fqdn}/#{record_id}")
           Dyn::Traffic::Resource.new(@dyn,
-                                   raw_rr["zone"],
                                    raw_rr["record_type"],
+                                   raw_rr["zone"],
                                    raw_rr["fqdn"],
                                    raw_rr["record_id"],
                                    raw_rr["ttl"],
@@ -127,10 +129,15 @@ module Dyn
       end
 
       def to_json
-        {
-          "rdata" => @rdata,
-          "ttl"   => @ttl
-        }.to_json
+        if record_type == 'Failover'
+          @rdata['ttl'] = @ttl
+          @rdata.to_json
+        else 
+          {
+            "rdata" => @rdata,
+            "ttl"   => @ttl
+          }.to_json
+        end
       end
 
       def method_missing(method_symbol, *args, &block)
